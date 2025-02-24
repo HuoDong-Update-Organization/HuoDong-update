@@ -3186,7 +3186,7 @@ const packs = function () {
                     'step 0'
                     if (target.isHealthy()) event._result = { index: 0 }
                     else {
-                        player.chooseContro().set('ai', () => _status.event.index).set('choiceList', [
+                        player.chooseControl().set('ai', () => _status.event.index).set('choiceList', [
                             '令' + get.translation(target) + '失去1点体力，从额外牌堆随机使用一张装备牌',
                             '令' + get.translation(target) + '回复1点体力，弃置一张装备牌',
                         ]).set('index', Math.max(0, get.sgn(get.attitude(player, target))));

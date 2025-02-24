@@ -1963,36 +1963,25 @@ const packs = function () {
             },
             bilibili_taoluan: {
                 hiddenCard(player, name) {
-                    return !player.getStorage('bilibili_taoluan').includes(name) && player.countCards('hes') > 0 && !player.hasSkill('bilibili_taoluan3') && lib.inpile.includes(name);
+                    return !player.getStorage('bilibili_taoluan').includes(name) && player.countCards('hes') > 0 && lib.inpile.includes(name);
                 },
                 audio: 'taoluan',
                 enable: 'chooseToUse',
                 filter(event, player) {
-                    return !player.hasSkill('bilibili_taoluan3') && player.countCards('hes', card => lib.inpile.some(name => {
-                        if (player.getStorage('bilibili_taoluan').includes(name)) return false;
-                        if (get.type(name) != 'basic' && get.type(name) != 'trick') return false;
-                        if (event.filterCard(get.autoViewAs({ name: name }, [card]))) return true;
-                        if (name == 'sha') {
-                            for (var nature of lib.inpile_nature) {
-                                if (event.filterCard(get.autoViewAs({ name: name }, [card]))) return true;
-                            }
-                        }
-                        return false;
-                    })) > 0;
+                    return get.inpileVCardList(info => {
+                        if (!['basic', 'trick'].includes(info[0])) return false;
+                        if (player.getStorage('bilibili_taoluan').includes(info[2])) return false;
+                        return player.countCards('hes', card => event.filterCard(get.autoViewAs({ name: info[2], nature: info[3] }, [card]), player, event));
+                    }).length;
                 },
                 onremove: true,
                 chooseButton: {
                     dialog(event, player) {
-                        var list = [];
-                        for (name of lib.inpile) {
-                            if (player.getStorage('bilibili_taoluan').includes(name)) continue;
-                            if (name == 'sha') {
-                                list.push(['基本', '', 'sha']);
-                                for (var j of lib.inpile_nature) list.push(['基本', '', 'sha', j]);
-                            }
-                            else if (get.type(name) == 'trick') list.push(['锦囊', '', name]);
-                            else if (get.type(name) == 'basic') list.push(['基本', '', name]);
-                        }
+                        var list = get.inpileVCardList(info => {
+                            if (!['basic', 'trick'].includes(info[0])) return false;
+                            if (player.getStorage('bilibili_taoluan').includes(info[2])) return false;
+                            return player.countCards('hes', card => event.filterCard(get.autoViewAs({ name: info[2], nature: info[3] }, [card]), player, event));
+                        })
                         return ui.create.dialog('滔乱', [list, 'vcard']);
                     },
                     filter(button, player) {
@@ -2019,6 +2008,7 @@ const packs = function () {
                             },
                             onuse(result, player) {
                                 player.markAuto('bilibili_taoluan', [result.card.name]);
+                                player.addTempSkill('bilibili_taoluan_effect');
                             },
                         }
                     },
@@ -2034,7 +2024,7 @@ const packs = function () {
                     respondSha: true,
                     respondShan: true,
                     skillTagFilter(player, tag, arg) {
-                        if (!player.countCards('hes') || player.hasSkill('bilibili_taoluan3')) return false;
+                        if (!player.countCards('hes')) return false;
                         if (tag == 'respondSha' || tag == 'respondShan') {
                             if (arg == 'respond') return false;
                             return !player.getStorage('bilibili_taoluan').includes(tag == 'respondSha' ? 'sha' : 'shan');
@@ -2042,45 +2032,45 @@ const packs = function () {
                         return !player.getStorage('bilibili_taoluan').includes('tao') || (!player.getStorage('bilibili_taoluan').includes('jiu') && arg == player);
                     },
                 },
-                group: 'bilibili_taoluan2',
-            },
-            bilibili_taoluan2: {
-                charlotte: true,
-                trigger: { player: 'useCardAfter' },
-                filter(event, player) {
-                    return event.skill == 'bilibili_taoluan_backup';
-                },
-                forced: true,
-                popup: false,
-                content() {
-                    'step 0'
-                    if (game.hasPlayer(function (current) {
-                        return current != player && current.countGainableCards(player, 'he') > 0;
-                    })) player.chooseTarget(true, function (card, player, target) {
-                        return target != player && target.countGainableCards(player, 'he') > 0;
-                    }, '滔乱<br><br><div class="text center">获得一名其他角色的一张牌，如果你获得的牌与你以此法使用的牌类别相同的牌，你失去1点体力且本回合〖滔乱〗失效').set('ai', function (target) {
-                        var player = _status.event.player;
-                        return get.effect(target, { name: 'guohe_copy2' }, player, player);
-                    });
-                    else event._result = { bool: false };
-                    'step 1'
-                    if (result.bool) {
-                        var target = result.targets[0];
-                        event.target = target;
-                        player.line(target, 'green');
-                        player.gainPlayerCard(target, true, 'he');
+                subSkill: {
+                    backup: {},
+                    effect: {
+                        charlotte: true,
+                        trigger: { player: 'useCardAfter' },
+                        filter(event, player) {
+                            return event.skill == 'bilibili_taoluan_backup';
+                        },
+                        forced: true,
+                        popup: false,
+                        content() {
+                            'step 0'
+                            if (game.hasPlayer(function (current) {
+                                return current != player && current.countGainableCards(player, 'he') > 0;
+                            })) player.chooseTarget(true, function (card, player, target) {
+                                return target != player && target.countGainableCards(player, 'he') > 0;
+                            }, '滔乱<br><br><div class="text center">获得一名其他角色的一张牌，如果你获得的牌与你以此法使用的牌类别相同的牌，你失去1点体力且本回合〖滔乱〗失效').set('ai', function (target) {
+                                var player = _status.event.player;
+                                return get.effect(target, { name: 'guohe_copy2' }, player, player);
+                            });
+                            else event._result = { bool: false };
+                            'step 1'
+                            if (result.bool) {
+                                var target = result.targets[0];
+                                event.target = target;
+                                player.line(target, 'green');
+                                player.gainPlayerCard(target, true, 'he');
+                            }
+                            else event._result = { bool: false };
+                            'step 2'
+                            if (!result.bool || get.type2(trigger.card) == get.type2(result.cards[0])) {
+                                player.popup('杯具');
+                                player.loseHp();
+                                player.tempBanSkill('bilibili_taoluan');
+                            }
+                        },
                     }
-                    else event._result = { bool: false };
-                    'step 2'
-                    if (!result.bool || get.type2(trigger.card) == get.type2(result.cards[0])) {
-                        player.popup('杯具');
-                        player.loseHp();
-                        player.addTempSkill('bilibili_taoluan3');
-                    }
-                },
+                }
             },
-            bilibili_taoluan3: { charlotte: true },
-            bilibili_taoluan_backup: {},
             //2013年韩旭爆料版神甘宁
             old_jieying: {
                 unique: true,
