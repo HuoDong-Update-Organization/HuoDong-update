@@ -7625,7 +7625,7 @@ const packs = function () {
                 audio: 'xinxuanhuo',
                 trigger: { player: 'phaseDrawEnd' },
                 filter(event, player) {
-                    return player.countCards('h') && game.countPlayer() > 2;
+                    return player.countCards('h') /* && game.countPlayer() > 2 */;
                 },
                 async cost(event, trigger, player) {
                     const ai2 = function (target) {
@@ -7649,7 +7649,7 @@ const packs = function () {
                         selectCard: [1, 2],
                         position: 'h',
                         filterTarget: lib.filter.notMe,
-                        goon: game.hasPlayer(current => current != player && ai2(player, current) > 0),
+                        goon: game.hasPlayer(current => current != player && ai2(player, current) > 0) || game.countPlayer() == 2,
                         ai1(card) {
                             if (!_status.event.goon) return 0;
                             return 7 - get.value(card);
@@ -26791,7 +26791,7 @@ const packs = function () {
                     let result;
                     while (Object.values(given_map).flat().length < 4) {
                         if (expansions.length > 1) {
-                            result = await player.chooseCardButton('通博：请选择要分配的牌', true, expansions, [1, expansions.length]).set('ai', button => {
+                            result = await player.chooseCardButton('通博：请选择要分配的牌', expansions, [1, 4 - Object.values(given_map).flat().length], Object.values(given_map).length > 0).set('ai', button => {
                                 const { player, goon } = get.event();
                                 if (!goon) return 0;
                                 if (ui.selected.buttons.length) return 0;
@@ -26801,7 +26801,7 @@ const packs = function () {
                         else return;
                         if (!result.bool) return;
                         const toGive = result.links;
-                        result = await player.chooseTarget(`选择一名角色获得${get.translation(toGive)}`, expansions.length === 1, lib.filter.notMe).set('ai', target => {
+                        result = await player.chooseTarget(`选择一名角色获得${get.translation(toGive)}`, true, lib.filter.notMe).set('ai', target => {
                             const { player, toEnemy } = get.event();
                             const att = get.attitude(player, target);
                             if (toEnemy) return -att;
@@ -26817,6 +26817,7 @@ const packs = function () {
                             }
                             if (!expansions.length) break;
                         }
+                        else break;
                     }
                     if (_status.connectMode) game.broadcastAll(() => {
                         delete _status.noclearcountdown;
