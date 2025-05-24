@@ -9,7 +9,7 @@ const packs = function () {
                 wechat_standard: ['wechat_sp_zhenji', 'wechat_guozhao', 'wechat_re_zuoci', 'wechat_jikang', 'wechat_lizhaojiaobo', 'wechat_liucheng', 'wechat_sunhanhua', 'wechat_zhugeguo', 'wechat_sp_diaochan', 'wechat_sunluyu', 'wechat_old_zhaoxiang', 'wechat_yj_ganning', 'wechat_re_luxun', 'wechat_yj_xuhuang', 'wechat_ganfuren', 'wechat_sunhao', 'wechat_yj_weiyan', 'wechat_sp_zhugeliang', 'wechat_zhenji', 'wechat_liuyan', 'wechat_sp_wangcan', 'wechat_xushi', 'wechat_baosanniang', 'wechat_litong', 'wechat_yj_zhoubuyi', 'wechat_jsp_huangyueying', 'wechat_re_gongsunzan', 'wechat_guanyinping', 'wechat_sp_machao', 'wechat_pangdegong', 'wechat_gongsunyuan', 'wechat_xusheng', 'wechat_yufan', 'wechat_handang', 'wechat_wanglang', 'wechat_huanghao', 'wechat_caiyong', 'wechat_yj_huangzhong', 'wechat_zhangzhang', 'wechat_chendeng', 'wechat_taoqian', 'wechat_kanze', 'wechat_xuezong', 'wechat_guyong', 'wechat_guansuo', 'wechat_zumao', 'wechat_yj_jushou', 'wechat_sp_pangde', 'wechat_caojie', 'wechat_zhuling', 'wechat_caizhenji', 'wechat_guohuanghou', 'wechat_yanyan', 'wechat_liaohua', 'wechat_liuyao', 'wechat_quancong', 'wechat_xiahouba', 'wechat_sp_jiangwei', 'wechat_caoxiu', 'wechat_yuanshao', 'wechat_sundeng', 'wechat_re_xushu', 'wechat_caopi', 'wechat_caozhang', 'wechat_buzhi', 'wechat_sp_taishici', 'wechat_masu', 'wechat_caifuren', 'wechat_jianyong', 'wechat_lukang', 'wechat_caozhi', 'wechat_huangyueying', 'wechat_weiyan', 'wechat_gaoshun', 'wechat_sunliang', 'wechat_wangping', 'wechat_sp_caiwenji', 'wechat_caochong', 'wechat_huangzhong', 'wechat_xiahouyuan', 'wechat_pangde', 'wechat_sunshangxiang', 'wechat_xuzhu', 'wechat_guanyu', 'wechat_caocao', 'wechat_shenpei', 'wechat_jiaxu', 'wechat_caoren', 'wechat_liuqi', 'wechat_zhaoxiang', 'wechat_caiwenji', 'wechat_menghuo', 'wechat_re_yuanshu', 'wechat_huaxiong', 'wechat_xiahoushi', 'wechat_xushu', 'wechat_zhaoyun', 'wechat_zhangfei', 'wechat_machao', 'wechat_yangxiu', 'wechat_lvmeng', 'wechat_zhoutai', 'wechat_bianfuren', 'wechat_sunluban', 'wechat_wuguotai', 'wechat_liubiao', 'wechat_liuchen', 'wechat_luxun', 'wechat_pangtong', 'wechat_zhangxingcai', 'wechat_zuoci', 'wechat_mayunlu', 'wechat_ruanhui', 'wechat_xurong', 'wechat_huojun'],
                 wechat_extra: ['zhugeliang', 'lvbu', 'lvmeng', 'guanyu'].map(i => `wechat_shen_${i}`),
                 wechat_zhiyin: ['xinxianying', 'guohuanghou', 'kongrong', 'caopi', 'jiaxu', 'zhangfei', 'dongzhuo', 'wangyi', 'zhangchunhua', 'hetaihou', 'zhurong', 'jiangwei', 'caozhi', 'liubei', 'sunce', 'xunyu', 'zhenji', 'xuzhu', 'yuanshao', 'lusu', 'guojia', 'lvbu', 'daqiao', 'xiaoqiao', 'caocao', 'zhugeliang', 'simayi', 'machao', 'huangyueying', 'caiwenji', 'zhouyu', 'sunquan', 'guanyu'].map(i => `wechat_zhiyin_${i}`),
-                wechat_sb: ['sunshangxiang', 'zhaoyun', 'machao', 'huangzhong', 'caocao'].map(i => `wechat_sb_${i}`),
+                wechat_sb: ['sunshangxiang', 'zhaoyun', 'machao', 'huangzhong', 'caocao', 'sunce'].map(i => `wechat_sb_${i}`),
             },
         },
         character: {
@@ -174,6 +174,7 @@ const packs = function () {
             wechat_sb_machao: ['male', 'shu', 4, ['wechatjlmashu', 'wechatjltieji']],
             wechat_sb_huangzhong: ['male', 'shu', 4, ['wechatsbliegong']],
             wechat_sb_caocao: ['male', 'wei', 4, ['wechatsbjianxiong', 'sbqingzheng']],
+            wechat_sb_sunce: ['male', 'wei', 4, ['wechatsbjiang', 'wechatsbhunzi']],
         },
         characterIntro: {
         },
@@ -7031,7 +7032,9 @@ const packs = function () {
                     }).forResult();
                 },
                 async content(event, trigger, player) {
-                    await event.targets[0].damage(trigger.source, 'unreal');
+                    const [target] = event.targets;
+                    await target.damage(trigger.source, 'unreal');
+                    await game.asyncDraw([player, target].sortBySeat());
                 },
             },
             // 极蔡文姬
@@ -11697,7 +11700,64 @@ const packs = function () {
                     });
                     if (result?.bool) player.removeMark('sbjianxiong', 1);
                 },
-            }
+            },
+            // 谋孙策
+            wechatsbjiang: {
+                audio: 'sbjiang',
+                inherit: 'sbjiang',
+                group: ['sbjiang_add', 'wechatsbjiang_qiben'],
+                subSkill: {
+                    qiben: {
+                        audio: 'sbjiang',
+                        enable: 'phaseUse',
+                        usable: 2,
+                        viewAs: { name: 'juedou' },
+                        filterCard: true,
+                        position: 'h',
+                        selectCard: -1,
+                        prompt() {
+                            return '出牌阶段限两次。你可以将所有手牌当【决斗】使用';
+                        },
+                        filter(event, player) {
+                            const hs = player.getCards('h');
+                            if (!hs.length) return false;
+                            if (hs.some(card => {
+                                const mod2 = game.checkMod(card, player, 'unchanged', 'cardEnabled2', player);
+                                if (mod2 === false) return true
+                            })) return false
+                            return event.filterCard(get.autoViewAs({ name: 'juedou' }, hs));
+                        },
+                        ai: {
+                            order: 0.001,
+                            result: {
+                                player(player, target) {
+                                    let cards = player.getCards('h');
+                                    return get.value(cards, player) * Math.sqrt(cards.length) <= 12;
+                                },
+                            },
+                            nokeep: true,
+                            skillTagFilter(player, tag, arg) {
+                                if (tag === 'nokeep') {
+                                    if (arg && (!arg.card || get.name(arg.card) !== 'tao')) return false;
+                                    return player.isPhaseUsing() && (player.getStat('skill').wechatsbjiang_qiben || 0) < 2 && player.hasCard(card => get.name(card) != 'tao', 'h');
+                                }
+                            },
+                        },
+
+                    }
+                }
+            },
+            wechatsbhunzi: {
+                audio: 'sbhunzi',
+                inherit: 'sbhunzi',
+                async content(event, trigger, player) {
+                    player.awakenSkill(event.name);
+                    await player.loseMaxHp();
+                    await player.recover();
+                    await player.draw(3);
+                    await player.addSkills(get.info(event.name).derivation);
+                },
+            },
         },
         dynamicTranslate: {
             wechatxiangzhi(player) {
@@ -12441,6 +12501,11 @@ const packs = function () {
             wechat_sb_caocao: '微信谋曹操',
             wechatsbjianxiong: '奸雄',
             wechatsbjianxiong_info: '①游戏开始时，你可获得至多2枚“治世”标记。②当你受到伤害后，你可获得伤害牌，摸3-X张牌（X为“治世”数），然后你可弃1枚“治世”。',
+            wechat_sb_sunce: '微信谋孙策',
+            wechatsbjiang: '激昂',
+            wechatsbjiang_info: '①当你使用【决斗】或红色【杀】指定目标后，或当你成为【决斗】或红色【杀】的目标后，你摸一张牌。②当你使用【决斗】时，你可以额外指定一名目标，然后你失去1点体力。③出牌阶段限两次。你可以将所有手牌当【决斗】使用。',
+            wechatsbhunzi: '魂姿',
+            wechatsbhunzi_info: '觉醒技。当你脱离濒死状态后，你减1点体力上限，回复1点体力，摸三张牌。然后你获得〖英姿〗和〖英魂〗。',
         },
     };
     for (var i in WeChatkill.character) {
