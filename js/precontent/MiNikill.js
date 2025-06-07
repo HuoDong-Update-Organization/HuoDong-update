@@ -13,7 +13,7 @@ const packs = function () {
                 MiNi_shen: ['Mbaby_shen_lusu', 'Mbaby_shen_luxun', 'Mbaby_shen_dengai', 'Mbaby_shen_zuoci', 'Mbaby_shen_taishici', 'Mbaby_shen_diaochan', 'Mbaby_shen_daxiaoqiao', 'Mbaby_shen_zhenji', 'Mbaby_shen_guojia', 'Mbaby_shen_huatuo', 'Mbaby_shen_dianwei', 'Mbaby_shen_lvbu', 'Mbaby_shen_zhugeliang', 'Mbaby_shen_lvmeng', 'Mbaby_shen_zhouyu', 'Mbaby_shen_guanyu', 'Mbaby_shen_liubei', 'Mbaby_shen_caocao', 'Mbaby_shen_zhangliao', 'Mbaby_shen_sunquan', 'Mbaby_shen_simayi', 'Mbaby_shen_zhaoyun', 'Mbaby_shen_ganning', 'Mbaby_shen_pangtong'],
                 MiNi_change: ['Mbaby_sb_sunquan', 'Mbaby_guanning', 'Mbaby_caoying', 'Mbaby_re_nanhualaoxian', 'Mbaby_re_sunyi', 'Mbaby_zhaoxiang', 'Mbaby_xushao', 'Mbaby_baosanniang', 'Mbaby_quanhuijie'],
                 MiNi_shengzhiyifa: ['Mbaby_jingwei', 'Mbaby_sunwukong', 'Mbaby_dalanmao', 'Mbaby_libai', 'Mbaby_change', 'Mbaby_nvwa', 'Mbaby_tunxingmenglix', 'Mbaby_xiaoshan'],
-                MiNi_sbCharacter: ['Mbaby_sb_zhenji', 'Mbaby_sb_ganning', 'Mbaby_ol_sb_jiangwei', 'Mbaby_sb_huangyueying', 'Mbaby_ol_sb_guanyu', 'Mbaby_sb_sunshangxiang', 'Mbaby_sb_xuhuang', 'Mbaby_sb_zhaoyun', 'Mbaby_sb_liubei', 'Mbaby_sb_caocao', 'Mbaby_sb_huanggai', 'Mbaby_sb_yuanshao', 'Mbaby_sb_yujin', 'Mbaby_sb_machao', 'Mbaby_sb_lvmeng', 'Mbaby_sb_huangzhong'],
+                MiNi_sbCharacter: ['Mbaby_sb_guojia', 'Mbaby_sb_zhenji', 'Mbaby_sb_ganning', 'Mbaby_ol_sb_jiangwei', 'Mbaby_sb_huangyueying', 'Mbaby_ol_sb_guanyu', 'Mbaby_sb_sunshangxiang', 'Mbaby_sb_xuhuang', 'Mbaby_sb_zhaoyun', 'Mbaby_sb_liubei', 'Mbaby_sb_caocao', 'Mbaby_sb_huanggai', 'Mbaby_sb_yuanshao', 'Mbaby_sb_yujin', 'Mbaby_sb_machao', 'Mbaby_sb_lvmeng', 'Mbaby_sb_huangzhong'],
                 MiNi_miaoKill: ['Mmiao_caiwenji', 'Mmiao_diaochan', 'Mmiao_caifuren', 'Mmiao_zhangxingcai', 'Mmiao_zhurong', 'Mmiao_huangyueying', 'Mmiao_daqiao', 'Mmiao_wangyi', 'Mmiao_zhangchunhua', 'Mmiao_zhenji', 'Mmiao_sunshangxiang', 'Mmiao_xiaoqiao', 'Mmiao_lvlingqi'],
                 MiNi_nianKill: ['Mnian_zhugeliang', 'Mnian_lvbu', 'Mnian_zhouyu'],
                 MiNi_fightKill: ['huangzhong', 'zhangliao'].map(i => `Mfight_${i}`),
@@ -95,6 +95,7 @@ const packs = function () {
             Mbaby_zhaoang: ['male', 'wei', 4, ['dczhongjie', 'minisushou']],
             Mbaby_caoanmin: ['male', 'wei', 4, ['minixianwei']],
             Mbaby_bianyue: ['female', 'wei', 3, ['dcbizu', 'miniwuxie']],
+            Mbaby_sb_guojia: ['male', 'wei', 3, ['minisbxianmou', 'lunshi']],
             //蜀
             Mbaby_guanyu: ['male', 'shu', 4, ['minirewusheng', 'minituodao', 'jsrgguanjue']],
             Mbaby_zhugeliang: ['male', 'shu', 3, ['minireguanxing', 'minikongcheng'], ['name:诸葛|亮']],
@@ -245,7 +246,7 @@ const packs = function () {
             Mbaby_sb_sunquan: ['male', 'wu', 4, ['jdsbzhiheng', 'minitongye', 'jdsbjiuyuan'], ['zhu']],
             Mbaby_xielingyu: ['female', 'wu', 3, ['miniyuandi', 'dcxinyou']],
             //群
-            Mbaby_gaoshun: ['male', 'qun', 4, ['minixianzhen', 'minijinjiu']],
+            Mbaby_gaoshun: ['male', 'qun', 4, ['minirexianzhen', 'minirejinjiu']],
             Mbaby_caifuren: ['female', 'qun', 3, ['minireqieting', 'minirexianzhou'], ['name:蔡|null']],
             Mbaby_lijue: ['male', 'qun', '5/6', ['xinfu_langxi', 'xinfu_yisuan']],
             Mbaby_zuoci: ['male', 'qun', 3, ['minishendao', 'minixinsheng'], ['die:true']],
@@ -6166,6 +6167,68 @@ const packs = function () {
                         }).set('targetsx', [player, target]);
                         if (result?.bool && result?.targets?.length) await result.targets[0].recover();
                     }
+                },
+            },
+            // 谋郭嘉
+            minisbxianmou: {
+                audio: 'ext:活动武将/audio/skill:2',
+                inherit: 'xianmou',
+                zhuanhuanji(player, skill) {
+                    player.storage[skill] = !player.storage[skill];
+                    player.changeSkin({ characterName: 'Mbaby_sb_guojia' }, 'Mbaby_sb_guojia' + (player.storage[skill] ? '_shadow' : ''));
+                },
+                intro: {
+                    content(storage) {
+                        let str = '你不因使用装备牌而失去过牌的回合结束时，你可以观看';
+                        if (!storage) str += '牌堆顶五张牌并获得至多X张牌，若未获得X张牌则获得〖遗计〗直到再发动此项（X为你本回合失去牌数）';
+                        else str += '一名角色手牌并弃置其中至多X张牌，若弃置X张牌则你进行一次【闪电】判定（X为你本回合失去牌数）';
+                        return str;
+                    },
+                },
+                filter(event, player) {
+                    return get.info('xinfu_shangjian').getNum(player);
+                },
+                derivation: 'minisbyiji',
+                group: 'minisbxianmou_change',
+                subSkill: {
+                    change: {
+                        audio: 'xianmou',
+                        audioname: ['yj_sb_guojia_shadow'],
+                        trigger: {
+                            global: 'phaseBefore',
+                            player: 'enterGame',
+                        },
+                        filter(event, player) {
+                            return event.name != 'phase' || game.phaseNumber == 0;
+                        },
+                        prompt2(event, player) {
+                            return '切换【先谋】为状态' + (player.storage.minisbxianmou ? '阳' : '阴');
+                        },
+                        check: () => Math.random() > 0.5,
+                        content() {
+                            player.changeZhuanhuanji('minisbxianmou');
+                        },
+                    },
+                },
+            },
+            minisbyiji: {
+                audio: 'ext:活动武将/audio/skill:2',
+                inherit: 'new_reyiji',
+                trigger: { player: ['damageEnd', 'dying'] },
+                filter(event, player, name) {
+                    if (event.name == 'damage') return event.num > 0;
+                    const history = game.getAllGlobalHistory();
+                    for (let i = history.length - 1; i >= 0; i--) {
+                        const evt = history[i]['everything'];
+                        for (let j = evt.length - 1; j >= 0; j--) {
+                            if (evt[j].name == 'dying' && evt[j].player == player && evt[j] != event) return false;
+                        }
+                        if (history[i].isRound) break;
+                    }
+                    return true;
+                },
+                getIndex(event, player, triggername) {
+                    return event.num || 1;
                 },
             },
             //蜀
@@ -20545,6 +20608,7 @@ const packs = function () {
                     },
                 },
             },
+            // 高顺
             minixianzhen: {
                 group: 'minixianzhen_miss',
                 audio: 'xianzhen',
@@ -20626,6 +20690,103 @@ const packs = function () {
                         },
                     },
                 },
+            },
+            minirexianzhen: {
+                audio: 'xianzhen',
+                inherit: 'xianzhen',
+                async content(event, trigger, player) {
+                    const { target } = event;
+                    const next = player.chooseToCompare(target);
+                    const { result } = await next;
+                    if (result?.bool) {
+                        player.markAuto(event.name + '_effect', [target]);
+                        player.addTempSkill(event.name + '_effect');
+                        const cards = [result.player].filter(i => get.position(i, true) == 'd' && player.hasUseTarget(i));
+                        if (player.hasUseTarget(cards[0])) await player.chooseUseTarget(cards[0], false);
+                    } else {
+                        const toGain = [];
+                        for (const lose_list of next.lose_list) {
+                            let [comparer, cards] = lose_list;
+                            if (!Array.isArray(cards)) cards = [cards];
+                            for (const card of cards) {
+                                if (get.name(card, comparer) == 'sha' && get.position(card, true) == 'd') toGain.push(card);
+                            }
+                        }
+                        if (toGain.length) await player.gain(toGain, 'gain2');
+                        player.addTempSkill(event.name + '_buff');
+                    }
+                },
+                group: ['minirexianzhen_damage', 'minirexianzhen_draw'],
+                subSkill: {
+                    effect: {
+                        charlotte: true,
+                        onremove: true,
+                        mod: {
+                            targetInRange(card, player, target) {
+                                if (player.getStorage('minirexianzhen_effect').includes(target)) return true;
+                            },
+                            cardUsableTarget(card, player, target) {
+                                if (player.getStorage('minirexianzhen_effect').includes(target)) return true;
+                            }
+                        },
+                        ai: {
+                            unequip: true,
+                            skillTagFilter(player, tag, arg) {
+                                if (!arg?.target || !player.getStorage('minirexianzhen_effect').includes(arg.target)) return false;
+                            },
+                        },
+                        intro: { content: '本回合无视$的防具且对其使用牌没有次数和距离限制' },
+                    },
+                    buff: {
+                        charlotte: true,
+                        onremove: true,
+                        mod: {
+                            cardEnabled(card) {
+                                if (card.name == 'sha') return false;
+                            },
+                            ignoredHandcard(card, player) {
+                                if (get.name(card, player) == 'sha') return true;
+                            },
+                            cardDiscardable(card, player, name) {
+                                if (name == 'phaseDiscard' && get.name(card, player) == 'sha') return false;
+                            },
+                        },
+                    },
+                    damage: {
+                        audio: 'xianzhen',
+                        trigger: { source: 'damageBegin1' },
+                        filter(event, player) {
+                            return player == _status.currentPhase && game.getGlobalHistory('everything', evt => {
+                                return evt.name == 'damage' && evt.source == player;
+                            }, event).indexOf(event) == 0;
+                        },
+                        forced: true,
+                        locked: false,
+                        async content(event, trigger, player) {
+                            trigger.num++;
+                        },
+                    },
+                    draw: {
+                        audio: 'xianzhen',
+                        trigger: { player: 'shaMiss' },
+                        forced: true,
+                        locked: false,
+                        async content(event, trigger, player) {
+                            await player.draw();
+                        },
+                    }
+                },
+            },
+            minirejinjiu: {
+                mod: {
+                    cardname(card, player) {
+                        if (card.name == 'jiu') return 'sha';
+                    },
+                    cardnumber(card) {
+                        if (card.name == 'jiu') return 13;
+                    },
+                },
+                inherit: 'minijinjiu',
             },
             minishendao: {
                 audio: 'ext:活动武将/audio/skill:2',
@@ -34103,6 +34264,17 @@ const packs = function () {
             minirehuxiao(player, skill) {
                 return lib.translate[player.storage[skill] ? 'minirehuxiao_rewrite_info' : 'minirehuxiao_info'];
             },
+            minisbxianmou(player) {
+                const storage = player.storage.minisbxianmou;
+                let str = '转换技，①游戏开始时，你可以转换此技能状态；②你不因使用装备牌而失去过牌的回合结束时，你可以：';
+                if (!storage) str += '<span class="bluetext">';
+                str += '阳，观看牌堆顶五张牌并获得至多X张牌，若未获得X张牌则获得〖遗计〗直到再发动此项；';
+                if (!storage) str += '</span>';
+                if (storage) str += '<span class="bluetext">';
+                str += '阴，观看一名角色手牌并弃置其中至多X张牌，若弃置X张牌则你进行一次【闪电】判定。';
+                if (storage) str += '</span>';
+                return str + '（X为你本回合不因使用装备牌而失去的牌数）';
+            },
         },
         translate: {
             MiNi_wei: '欢乐三国杀·魏国',
@@ -34210,6 +34382,7 @@ const packs = function () {
             Mbaby_zhaoang: '欢杀赵昂',
             Mbaby_caoanmin: '欢杀曹安民',
             Mbaby_bianyue: '欢杀卞玥',
+            Mbaby_sb_guojia: '欢杀谋郭嘉',
             miniluoshen: '洛神',
             miniluoshen_info: '准备阶段，你可以进行一次判定并获得判定牌，若判定结果为黑色，你可重复此流程。',
             minireluoshen: '洛神',
@@ -34445,6 +34618,10 @@ const packs = function () {
             minixianwei_info: '锁定技，准备阶段，你废除一个装备栏并摸X张牌（X为你未废除的装备栏数+1），然后你令一名其他角色对其自己使用一张牌堆中的一张与此装备栏副类别相同的装备牌（没有可使用的牌则改为摸一张牌）。当你废除所有装备栏后，你加2点体力上限，然后你与所有其他角色视为在彼此的攻击范围内。',
             miniwuxie: '无胁',
             miniwuxie_info: '出牌阶段结束时，你可以选择一名其他角色，与其将手牌中所有伤害牌置入牌堆底，然后你可令你与其中的一名角色回复1点体力。',
+            minisbxianmou: '先谋',
+            minisbxianmou_info: '转换技。①游戏开始时，你可以转换此技能状态；②你不因使用装备牌而失去过牌的回合结束时，你可以：阳，观看牌堆顶五张牌并获得至多X张牌，若未获得X张牌则获得〖遗计〗直到再发动此项；阴，观看一名角色手牌并弃置其中至多X张牌，若弃置X张牌则你进行一次【闪电】判定。（X为你本回合不因使用装备牌而失去的牌数）',
+            minisbyiji: '遗计',
+            minisbyiji_info: '当你受到1点伤害后或当你每轮首次进入濒死状态时，你可以摸两张牌，然后可以将至多两张手牌交给其他角色。',
             //蜀
             Mbaby_guanyu: '欢杀关羽',
             Mbaby_zhugeliang: '欢杀诸葛亮',
@@ -35293,6 +35470,10 @@ const packs = function () {
             minixianzhen_info: '锁定技。你于回合内首次使用【杀】造成伤害时，此伤害+1；你于回合内使用的第一张【杀】被闪避后，你摸一张牌。',
             minijinjiu: '禁酒',
             minijinjiu_info: '锁定技。①你的【酒】均视为【杀】且不计入出牌阶段的使用次数。②其他角色使用的【酒】进入弃牌堆后，你获得之。③你的回合内，其他角色不能使用【酒】。',
+            minirexianzhen: '陷阵',
+            minirexianzhen_info: '①出牌阶段限一次，你可以与一名角色拼点。若你赢，你可以使用你的拼点牌且本回合你无视该角色的防具且对其使用牌没有次数和距离限制；若你没赢，你获得拼点牌中的【杀】且本回合你不能使用【杀】且你的【杀】不计入手牌上限。②你于回合内首次造成伤害时，此伤害+1。③你使用的【杀】被【闪】抵消后，你摸一张牌。',
+            minirejinjiu: '禁酒',
+            minirejinjiu_info: '锁定技。①你的【酒】均视为点数为K的【杀】且不计入出牌阶段的使用次数。②其他角色使用的【酒】进入弃牌堆后，你获得之。③你的回合内，其他角色不能使用【酒】。',
             miniluanji: '乱击',
             miniluanji_info: '你可以将两张与你本回合以此法转化的花色均不相同的手牌当【万箭齐发】使用。若你以此法使用的【万箭齐发】未造成伤害，则你可以在此牌结算完成后摸X张牌。（X为此牌的目标数）',
             minixueyi: '血裔',

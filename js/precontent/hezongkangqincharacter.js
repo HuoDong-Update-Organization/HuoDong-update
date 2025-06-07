@@ -417,12 +417,11 @@ const packs = function () {
                 audio: 'ext:活动武将/audio/skill:true',
                 trigger: { global: 'useCard' },
                 filter(event, player) {
-                    return event.player == _status.currentPhase && event.player != player && get.type(event.card) == 'trick';
+                    return event.player == _status.currentPhase && event.player != player && get.type(event.card) == 'trick' && event.getHistory('useCard', evt => get.type(evt.card) == 'trick').indexOf(event) == 0;
                 },
                 check(event, player) {
                     return get.attitude(player, event.player) < 0;
                 },
-                usable: 1,
                 logTarget: 'player',
                 content() {
                     'step 0'

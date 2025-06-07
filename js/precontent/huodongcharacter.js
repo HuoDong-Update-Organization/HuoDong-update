@@ -9027,9 +9027,11 @@ const packs = function () {
                         },
                         forced: true,
                         popup: false,
-                        content() {
-                            const next = player.chooseToUse(true);
+                        async content(event, trigger, player) {
+                            if (!player.hasCard(card => player.hasUseTarget(get.autoViewAs({ name: 'sha' }, [card]), true), 'hes')) return;
+                            const next = player.chooseToUse();
                             next.set('openskilldialog', '###吴起兵法###将一张牌当作【杀】使用');
+                            next.set('forced', true);
                             next.set('norestore', true);
                             next.set('addCount', false);
                             next.set('_backupevent', 'bol_wuqibingfa_backup');
@@ -9038,6 +9040,7 @@ const packs = function () {
                                 replace: { window() { } }
                             });
                             next.backup('bol_wuqibingfa_backup');
+                            await next;
                         },
                     },
                     backup: {
