@@ -2887,33 +2887,50 @@ const packs = function () {
             //辛宪英
             fh_caishi: {
                 inherit: 'recaishi',
-                *content(event, map) {
-                    var player = map.player, cards = [], trigger = map.trigger;
-                    player.getHistory('gain', function (evt) {
+                async cost(event, trigger, player) {
+                    const cards = [];
+                    player.getHistory('gain', evt => {
                         if (evt.getParent().name == 'draw' && evt.getParent('phaseDraw') == trigger) cards.addArray(evt.cards);
                     });
-                    var str = '展示本阶段获得的牌，然后';
+                    const isSame = lib.skill.recaishi.isSame(trigger);
+                    let str = `展示${get.translation(cards)}，然后`;
                     if (lib.skill.recaishi.isSame(trigger)) str += '本回合你修改〖忠鉴〗为“出牌阶段限两次”';
-                    else str += '回复1点体力，然后本回合内不能对自己使用牌';
-                    var result = yield player.chooseBool(get.prompt('fh_caishi'), str).set('ai', function () {
-                        if (_status.event.goon) return true;
-                        var player = _status.event.player;
-                        if (player.countCards('hs', { name: 'tao' })) return false;
+                    else if (player.isDamaged()) str += '回复1点体力，然后本回合内不能对自己使用牌';
+                    event.result = await player.chooseBool(get.prompt(event.skill), str).set('choice', (() => {
+                        if (isSame) return true;
+                        if (player.countCards('h', 'tao')) return false;
                         if (player.hp < 2) return true;
-                        return !player.countCards('h', card => {
-                            var info = get.info(card);
+                        return player.countCards('h', card => {
+                            const info = get.info(card);
                             return info && (info.toself || info.selectTarget == -1) && player.canUse(card, player) && player.getUseValue(card) > 0;
-                        });
-                    }).set('goon', lib.skill.recaishi.isSame(trigger));
-                    if (result.bool) {
-                        player.logSkill('fh_caishi');
-                        player.show(cards, get.translation(player) + '发动了技能【才识】');
-                        if (lib.skill.recaishi.isSame(trigger)) player.addTempSkill('recaishi2');
-                        else {
-                            player.recover();
-                            player.addTempSkill('recaishi3');
-                        }
+                        }) == 0;
+                    })()).forResult();
+                    if (event.result.bool) event.result = {
+                        bool: true,
+                        cards,
+                        cost_data: isSame ? 'rewrite' : 'recver',
                     }
+                },
+                async content(event, trigger, player) {
+                    await player.showCards(event.cards, get.translation(player) + '发动了技能【才识】');
+                    if (event.cost_data === 'rewrite') {
+                        player.addTempSkill('rezhongjian_rewrite');
+                    } else {
+                        await player.recover();
+                        player.addTempSkill(event.name + '_effect');
+                    }
+                },
+                subSkill: {
+                    effect: {
+                        charlotte: true,
+                        mark: true,
+                        intro: { content: '本回合内不能对自己使用牌' },
+                        mod: {
+                            targetEnabled(card, player, target) {
+                                if (player == target) return false;
+                            },
+                        },
+                    },
                 },
             },
             //吴苋

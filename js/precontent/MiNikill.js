@@ -1860,93 +1860,106 @@ const packs = function () {
                 },
             },
             minizhongjian: {
-                enable: 'phaseUse',
                 audio: 'zhongjian',
-                usable: 2,
+                inherit: 'rezhongjian',
                 filter(event, player) {
-                    if (player.getStat().skill.minizhongjian && !player.hasSkill('recaishi2')) return false;
-                    return game.hasPlayer(function (current) {
-                        return lib.skill.minizhongjian.filterTarget(null, player, current);
-                    });
+                    return game.hasPlayer(current => lib.skill.minizhongjian.filterTarget(null, player, current));
                 },
                 filterTarget(card, player, target) {
-                    if (!player.storage.rezhongjian2) return true;
-                    return !player.storage.rezhongjian2[0].includes(target) && !player.storage.rezhongjian2[1].includes(target);
+                    if (!player.storage.minizhongjian_effect) return true;
+                    return !player.storage.minizhongjian_effect[0]?.includes(target) && !player.storage.minizhongjian_effect[1]?.includes(target);
                 },
-                content() {
-                    'step 0'
-                    player.chooseControl().set('prompt', '忠鉴：为' + get.translation(target) + '选择获得一项效果').set('choiceList', [
-                        '令其于下回合开始前首次造成伤害后弃置两张牌',
-                        '令其于下回合开始前首次受到伤害后摸两张牌',
-                    ]).set('ai', function () {
-                        return get.attitude(_status.event.player, _status.event.getParent().target) > 0 ? 1 : 0;
-                    });
-                    'step 1'
-                    player.addSkill('rezhongjian2');
-                    //var str=['造成伤害弃牌','受到伤害摸牌'][result.index];
-                    //player.popup(str,['fire','wood'][result.index]);
-                    //game.log(player,'选择了','#y'+str);
-                    player.storage.rezhongjian2[result.index].push(target);
-                    //player.markSkill('rezhongjian2');
-                },
-                ai: {
-                    order: 10,
-                    expose: 0,
-                    result: {
-                        player(player, target) {
-                            if (get.attitude(player, target) == 0) return false;
-                            var sgn = get.sgn((get.realAttitude || get.attitude)(player, target));
-                            if (game.countPlayer(function (current) {
-                                return get.sgn((get.realAttitude || get.attitude)(player, current)) == sgn;
-                            }) <= game.countPlayer(function (current) {
-                                return get.sgn((get.realAttitude || get.attitude)(player, current)) != sgn;
-                            })) return 1;
-                            return 0.9;
+                line: true,
+                log: true,
+                subSkill: {
+                    rewrite: { charlotte: true },
+                    effect: {
+                        init(player, skill) {
+                            player.storage[skill] ??= [[], []];
+                        },
+                        charlotte: true,
+                        onremove: true,
+                        trigger: { global: ["damageSource", "damageEnd"] },
+                        filter(event, player, name) {
+                            const index = name == 'damageSource' ? 0 : 1;
+                            const target = name == 'damageSource' ? event.source : event.player;
+                            return target?.isIn() && player.storage['minizhongjian_effect'][index].includes(target);
+                        },
+                        forced: true,
+                        logTarget(event, player, name) {
+                            return name == 'damageSource' ? event.source : event.player;
+                        },
+                        async content(event, trigger, player) {
+                            const [target] = event.targets;
+                            const index = event.triggername == 'damageSource' ? 0 : 1;
+                            const storage = player.storage[event.name];
+                            storage[index].remove(target);
+                            if (storage[0].length + storage[1].length) {
+                                player.markSkill(event.name);
+                            } else {
+                                player.removeSkill(event.name);
+                            }
+                            await target[event.triggername == 'damageSource' ? 'chooseToDiscard' : 'draw'](2, true, 'he');
+                            await player.draw();
+                        },
+                        intro: {
+                            markcount(storage) {
+                                if (!storage) return 0;
+                                return storage[0].length + storage[1].length;
+                            },
+                            mark(dialog, storage, player) {
+                                if (!storage) return '尚未选择';
+                                if (player == game.me || player.isUnderControl()) {
+                                    if (storage?.[0]?.length) {
+                                        dialog.addText('弃牌');
+                                        dialog.add([storage[0], 'player']);
+                                    }
+                                    if (storage?.[1]?.length) {
+                                        dialog.addText('摸牌');
+                                        dialog.add([storage[1], 'player']);
+                                    }
+                                } else {
+                                    dialog.addText(`${get.translation(player)}共选择了${get.cnNumber(storage[0].length + storage[1].length)} 人`);
+                                }
+                            },
                         },
                     },
                 },
             },
             minicaishi: {
-                audio: 'caishi',
-                trigger: { player: 'phaseDrawEnd' },
-                direct: true,
-                isSame(event) {
-                    var cards = [];
-                    event.player.getHistory('gain', function (evt) {
-                        if (evt.getParent().name == 'draw' && evt.getParent('phaseDraw') == event) cards.addArray(evt.cards);
-                    });
-                    if (!cards.length) return 'nogain';
-                    var list = [];
-                    for (var i = 0; i < cards.length; i++) {
-                        list.add(get.suit(cards[i]));
-                    }
-                    if (list.length == 1) return true;
-                    if (list.length == cards.length) return false;
-                    return 'nogain';
-                },
+                inherit: 'recaishi',
                 filter(event, player) {
-                    var isSame = lib.skill.minicaishi.isSame(event);
-                    if (isSame == 'nogain') return false;
-                    return (isSame && !player.hasSkill('recaishi2')) || player.isDamaged();
-                },
-                content() {
-                    'step 0'
-                    if (lib.skill.minicaishi.isSame(trigger)) {
-                        if (!player.hasSkill('recaishi2')) {
-                            player.logSkill('minicaishi');
-                            player.addTempSkill('recaishi2');
-                            lib.skill.recaishi2.charlotte = true;
-                            game.log(player, '修改了技能', '#g【忠鉴】');
-                            event.finish();
-                            return;
-                        }
+                    const isSame = lib.skill.recaishi.isSame(event);
+                    if (isSame == 'nogain') {
+                        return false;
                     }
-                    else if (player.isDamaged()) player.chooseToDiscard(get.prompt('minicaishi'), '弃置一张牌并回复1点体力').set('ai', function (card) {
-                        return 7 - get.value(card);
-                    }).logSkill = 'minicaishi';
-                    else event.finish();
-                    'step 1'
-                    if (result.bool) player.recover();
+                    return isSame || (player.isDamaged() && player.hasCard(card => {
+                        if (_status.connectMode) return true;
+                        return lib.filter.cardDiscardable(card, player);
+                    }, 'he'));
+                },
+                async cost(event, trigger, player) {
+                    const isSame = lib.skill.recaishi.isSame(trigger);
+                    if (isSame) {
+                        event.result = {
+                            bool: true,
+                            cost_data: 'rewrite',
+                        };
+                    } else if (player.isDamaged()) {
+                        event.result = await player.chooseToDiscard(get.prompt(event.skill), '弃置一张牌，然后回复1点体力', 'he', 'chooseonly').set('ai', card => {
+                            const goon = get.event();
+                            return goon ? 7 - get.value(card) : 0;
+                        }).set('goon', get.recoverEffect(player, player, player) > 0).forResult();
+                    }
+                },
+                async content(event, trigger, player) {
+                    if (event.cost_data === 'rewrite') {
+                        player.addTempSkill('minizhongjian_rewrite');
+                        game.log(player, '修改了技能', '#g【忠鉴】');
+                    } else {
+                        await player.discard(event.cards);
+                        await player.recover();
+                    }
                 },
             },
             minijiaozhao: {
